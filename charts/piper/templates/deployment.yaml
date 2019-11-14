@@ -1,0 +1,77 @@
+# nhs pipers deployment
+
+---
+# mongo piper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "piper.mongo.deployment-name" .}}
+  labels:
+{{ include  "piper.mongo.main.app.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.pipers_replicas }}
+  selector:
+    matchLabels:
+{{ include "piper.mongo.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "piper.mongo.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: nhs-mongo-piper-container
+        image: {{ .Values.global.repo | default .Values.repo }}/nhs_piper:{{.Values.image_tag}}
+        env:
+          - name: MONGO_HOST
+            value: {{ .Values.env.mongo_host | quote }}
+          - name: MONGO_REPLICASET
+            value: {{ .Values.env.mongo_replicaset | quote }}
+          - name: SOLR_HOST
+            value: {{ .Values.env.solr_host | quote }}
+          - name: KAFKA_HOST
+            value: {{ .Values.env.kafka_host | quote }}
+          - name: ATTEMPT_NUM
+            value: {{ .Values.env.mongo_attempt_num | quote }}
+          - name: DELAY
+            value: {{ .Values.env.delay | quote }}
+        # Thes args are crazyness, start_piper.sh should get its args from env variables since
+        # the python piper read their are from env variables.
+        command: ["/app/start_piper.sh"]
+        args: ["mongo", {{ .Values.env.mongo_host | quote }}, {{ .Values.env.mongo_replicaset | quote }}]
+
+---
+# solr piper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "piper.solr.deployment-name" .}}
+  labels:
+{{ include  "piper.solr.main.app.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.pipers_replicas }}
+  selector:
+    matchLabels:
+{{ include "piper.solr.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "piper.solr.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: nhs-solr-piper-container
+        image: {{ .Values.global.repo | default .Values.repo }}/nhs_piper:{{.Values.image_tag}}
+        env:
+          - name: SOLR_HOST
+            value: {{ .Values.env.solr_host | quote }}
+#          - name: SOLR_PORT
+#            value: 8993
+          - name: KAFKA_HOST
+            value: {{ .Values.env.kafka_host | quote }}
+          - name: ATTEMPT_NUM
+            value: {{ .Values.env.solr_attempt_num | quote }}
+          - name: DELAY
+            value: {{ .Values.env.delay | quote }}
+        command: ["/app/start_piper.sh"]
+        args: ["solr", {{ .Values.env.solr_host | quote }}]

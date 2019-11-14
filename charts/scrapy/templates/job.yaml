@@ -1,0 +1,54 @@
+---
+# K8s manifest for nhs scrapy
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "scrapy.job-name" .}}
+  labels:
+{{ include "scrapy.labels" . | indent 4 }}
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: create-nhs-topic
+          image: solsson/kafka:0.11.0.0
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              exec 2>&1
+              COUNTER=0
+              while [  $COUNTER -lt 20 ]; do
+                brokers=$(echo dump | nc solr-zookeeper-2.solr-zookeeper-headless 2181 | grep brokers)
+                if [ $? -eq 1 ] || [ -z $brokers ]; then
+                  echo "Kafka is NOT running , waiting. $COUNTER attempts...";
+                  COUNTER=`expr $COUNTER + 1`;
+                  sleep 6;
+                else
+                  echo "Kafka is running ";
+                  break;
+                fi                
+              done;
+              if [ $COUNTER -eq 20 ]; then
+                echo "Kafka not running. Giving up .........";
+                exit 1;
+              else
+                echo "Creating THE topic!!!!"
+                bin/kafka-topics.sh --create --if-not-exists --zookeeper solr-zookeeper-0.solr-zookeeper-headless:2181,solr-zookeeper-1.solr-zookeeper-headless:2181,solr-zookeeper-2.solr-zookeeper-headless:2181  --replication-factor 1 --partitions 1 --topic scrapypipe;
+              fi
+
+      containers:
+      - name: nhs-scrapy
+        image: {{ .Values.global.repo | default .Values.repo }}/scrapy-nhs:{{.Values.image_tag}}
+        env:
+          - name: KAFKA_HOST
+            value: {{ .Values.env.kafka_host }}
+          - name: BULK_SEND
+            value: {{ .Values.env.bulk_enable }}
+          - name: FILES_STORE
+            value: {{ .Values.env.files_store | quote }}
+        command: [{{ .Values.command | quote }}]
+
+      restartPolicy: Never
+  backoffLimit: 4

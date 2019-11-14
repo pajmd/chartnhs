@@ -1,0 +1,19 @@
+---
+# web app service
+---
+kind: Service         
+apiVersion: v1        
+metadata:             
+  name: nhsserver-service 
+  labels:
+{{ include "webapp.labels" . | indent 4 }}
+spec:                 
+  selector:    
+{{ include "webapp.selector" . | indent 6 }}        
+  ports:              
+  - protocol: TCP     
+    targetPort: {{ .Values.appPort }}  
+    port: {{ .Values.port }}
+    name: http             
+  type: NodePort  # LoadBalancer not supported with minikube.
+                      # one would need to install an IngressControler to setup a domain name which maps to the pod; see: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers

@@ -1,0 +1,17 @@
+# Default values for webapp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+port: 88
+appPort: 8000
+
+replicasNum: 2
+
+repo: "somerepo"
+image_tag: v0.0.6
+
+# mongo hosts need to be normalized with pipers and so they can be define in the top chart values.yaml
+# as globals i.e. either host:port or just host. See webapp _helpers.tpl
+mongo_host: mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local
+mongo_replicaset: rs0
+solr_host: solr-svc

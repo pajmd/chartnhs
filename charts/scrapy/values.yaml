@@ -1,0 +1,10 @@
+# Environment variables for scrapy
+env:
+  kafka_host: 'kafka-svc'
+  bulk_enable: 'yes'
+  files_store: "/app/nhs_test_files"
+
+# scrapy image repo public pajmd or private pjmd-ubuntu.cm
+repo: pajmd
+image_tag: "v0.0.6"
+command: "/app/docker_send_test_files.sh"

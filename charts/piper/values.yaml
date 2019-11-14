@@ -1,0 +1,19 @@
+# Default values for piper.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# piper image repo public pajmd or private pjmd-ubuntu.cm
+repo: pajmd
+
+image_tag: "v0.0.4"
+pipers_replicas: 1
+
+# mongo hosts need to be normalized with pipers and so they can be define in the top chart values.yaml
+# as globals i.e. either host:port or just host. See webapp _helpers.tpl
+env:
+  mongo_host: mongo-0.mongo.default.svc.cluster.local:27017,mongo-1.mongo.default.svc.cluster.local:27017,mongo-2.mongo.default.svc.cluster.local:27017
+  mongo_replicaset: rs0
+  solr_host: solr-svc
+  kafka_host: kafka-svc
+  mongo_attempt_num: "12"
+  solr_attempt_num: "36"
+  delay: "5"

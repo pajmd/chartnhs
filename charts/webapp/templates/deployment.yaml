@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nhs-server-deployment
+  labels:
+{{ include "webapp.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicasNum }}
+  selector:
+    matchLabels:
+{{ include "webapp.selector" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "webapp.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: nhsserver-container
+        image: {{ include "webapp.image.repo" . }}/nhs-server-app:{{.Values.image_tag}}
+        ports:
+        - containerPort: {{ .Values.appPort }}
+          name: http
+        env:
+          - name: MONGO_HOST
+            value: {{ include "webapp.mongo_host" . }}
+          - name: MONG_REPLSET
+            value: {{ include "webapp.mongo_replica" . }}
+          - name: SOLR_HOST
+            value: {{ include "webapp.solr_host" . }}
