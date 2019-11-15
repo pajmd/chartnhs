@@ -1,0 +1,26 @@
+---
+# Zookeeper headless service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zookeeper.headless.service.name" .}}
+  labels:
+{{ include "zookeeper.labels" . | indent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - name: client
+      port: {{ .Values.env.ZK_CLIENT_PORT }}
+      targetPort: client
+      protocol: TCP
+    - name: election
+      port: {{ .Values.env.ZK_ELECTION_PORT }}
+      targetPort: election
+      protocol: TCP
+    - name: server
+      port: {{ .Values.env.ZK_SERVER_PORT }}
+      targetPort: server
+      protocol: TCP
+  selector:
+{{ include "zookeeper.selector" . | indent 4}}

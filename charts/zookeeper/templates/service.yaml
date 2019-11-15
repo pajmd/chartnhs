@@ -1,0 +1,18 @@
+---
+# cluster ip service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zookeeper.service.name" .}}
+  labels:
+{{ include "zookeeper.labels" . | indent 4 }}
+spec:
+  type: clusterIP
+  ports:
+    - name: client
+      port: {{ .Values.env.ZK_CLIENT_PORT }}
+      targetPort: client
+      protocol: TCP
+  selector:
+{{ include "zookeeper.selector" . | indent 4}}

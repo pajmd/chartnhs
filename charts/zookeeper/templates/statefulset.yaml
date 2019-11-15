@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  labels:
+{{ include "zookeeper.labels" . | indent 4 }}
+spec:
+  serviceName: {{ include "zookeeper.headless.service.name" .}}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+{{ include "zookeeper.pod.labels" . | indent 6}}
+  updateStrategy:
+    type: OnDelete
+    
+  template:
+    metadata:
+      labels:
+{{ include "zookeeper.pod.labels" . | indent 8 }}
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 1800
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: zookeeper
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -xec
+            - zkGenConfig.sh && exec zkServer.sh start-foreground
+          ports:
+            - name: client
+              containerPort: {{ .Values.env.ZK_CLIENT_PORT }}
+              protocol: TCP
+              
+            - name: election
+              containerPort:  {{ .Values.env.ZK_ELECTION_PORT }}
+              protocol: TCP
+              
+            - name: server
+              containerPort:  {{ .Values.env.ZK_SERVER_PORT }}
+              protocol: TCP
+              
+          livenessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }}            
+          readinessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }}            
+          env:
+            - name: ZK_REPLICAS
+              value: "3"
+          {{- range $key, $value := .Values.env }}
+            - name: {{ $key | upper | replace "." "_" }}
+              value: {{ $value | quote }}
+          {{- end }}
+          resources:
+            {}
+            
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/zookeeper
+      volumes:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "5Gi"
