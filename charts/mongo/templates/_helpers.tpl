@@ -95,6 +95,7 @@ Inline pod labels
 
 {{/*
 quote & trim inline pod labels
+see http://masterminds.github.io/sprig/strings.html
 */}}
 {{- define "mongo.pod.labels.as.parameters" -}}
 {{- $t := include "mongo.pod.labels.inline" . }}
