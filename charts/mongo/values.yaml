@@ -1,0 +1,21 @@
+# Default values for mongo.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+port: 27017
+
+gracePeriodSeconds: 10
+
+mongoTag: 3.4
+
+replicaSet: rs0
+
+mongoPort: 27017
+
+pod:
+  type: "replicaset"
+  nhsdb: "mongodb"
+
+storage: 2Gi

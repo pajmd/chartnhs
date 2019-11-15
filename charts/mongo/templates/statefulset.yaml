@@ -1,0 +1,59 @@
+#
+# To connect to the db:
+# k run mongoshell --rm -it --image mongo -- sh
+# mongo --host rs0/mongo-0.mongo.default.svc.cluster.local:27017,mongo-1.mongo.default.svc.cluster.local:27017,mongo-2.mongo.default.svc.cluster.local:27017
+#
+
+---
+# mongo statefulset
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+{{ include "mongo.labels" . | indent 4 }}
+spec:
+  serviceName: "mongo"
+  selector:
+    matchLabels:
+{{ include "mongo.selector" . | indent 6 }}
+  replicas: { .Values.replicaCount}
+  template:
+    metadata:
+      labels:
+{{ include "mongo.pod.labels" . | indent 8 }}
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.gracePeriodSeconds }}
+      containers:
+        - name: mongo
+          image: mongo:{{ .Values.mongoTag }}
+          command:
+            - mongod
+            - "--replSet"
+            - {{ .Values.replicaSet }}
+            - "--bind_ip"
+            - 0.0.0.0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: {{ .Values.mongoPort }}
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+        # The sidecar checks is there are new k8s replica up or down and add them to the mongo replca set
+        - name: mongo-sidecar
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: {{ include "mongo.pod.labels.as.parameters" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-persistent-storage
+      annotations:
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.storage }}
+
