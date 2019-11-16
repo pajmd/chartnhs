@@ -1,0 +1,37 @@
+# Default values for kafka.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 9092
+
+clusterIp: "None"
+
+configMapName: "broker-config"
+
+gracePeriodSeconds: 30
+
+image:
+  repository: solsson/kafka
+  tag: 0.11.0.0@sha256:b27560de08d30ebf96d12e74f80afcaca503ad4ca3103e63b1fd43a2e4c976ce
+  pullPolicy: IfNotPresent
+
+zookeeper:
+  service: zookeeper
+  port: 2181
+
+logRetention: -1
+
+createTopics: true
+
+resources: 
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+storageSpace: 1Gi
+
+goTemplate: '{{index .metadata.labels "failure-domain.beta.kubernetes.io/zone"}}'

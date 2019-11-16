@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.statefulset.name" . }}
+  namespace: default
+  labels:
+{{ include "kafka.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{ include "kafka.pod.labels" . | indent 6 }}
+  serviceName: "kafka-broker"
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+{{ include "kafka.pod.labels" . | indent 8 }}
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.gracePeriodSeconds }}
+      initContainers:
+      - name: init-config
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        command: ['/bin/bash', '/etc/kafka-configmap/init.sh']
+        volumeMounts:
+        - name: configmap
+          mountPath: /etc/kafka-configmap
+        - name: config
+          mountPath: /etc/kafka
+      containers:
+      - name: broker
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+        - name: KAFKA_LOG4J_OPTS
+          value: -Dlog4j.configuration=file:/etc/kafka/log4j.properties
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        # allow auto create topic
+        # using the cluster ip zookeper service to connect to zookeeper
+        command:
+        - ./bin/kafka-server-start.sh
+        - /etc/kafka/server.properties
+        - --override
+        -   zookeeper.connect={{ .Values.zookeeper.service }}:{{ .Values.zookeeper.port }}
+        - --override
+        -   log.retention.hours={{ .Values.logRetention }}
+        - --override
+        -   log.dirs=/var/lib/kafka/data/topics
+        - --override
+        -   auto.create.topics.enable={{ .Values.createTopics }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'echo "" | nc -w 1 127.0.0.1 9092'
+        volumeMounts:
+        - name: config
+          mountPath: /etc/kafka
+        - name: data
+          mountPath: /var/lib/kafka/data
+      volumes:
+      - name: configmap
+        configMap:
+          name: {{ .Values.configMapName }}
+      - name: config
+        emptyDir: {}
+  volumeClaimTemplates:
+  # not using a special PersistentVolume and StorageClass
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.storageSpace }}
