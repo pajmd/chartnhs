@@ -1,0 +1,16 @@
+---
+# Headless service
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: {{ include "solr.headless.service.name" .}}
+  labels:
+{{ include "solr.labels" . | indent 4 }}
+spec:
+  clusterIP: {{ .Values.headlessService.clusterIp | quote }}
+  ports:
+  - port: {{ .Values.servicePort }}
+    name: {{ .Values.headlessService.name | quote }}
+  selector:
+{{ toYaml .Values.selector | indent 4}}

@@ -1,0 +1,95 @@
+# Default values for solr.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  repository: nginx
+  tag: stable
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+servicePort: 8983
+
+service:
+  type: ClusterIP
+  name: "solr-client"
+
+headlessService:
+  clusterIp: "None"
+  name: "solr-headless"
+
+selector:
+  type: "search-engine"
+  app: "solr"
+
+updateStrategyType: "OnDelete"
+
+podAnnotations: {}
+
+affinity: {}
+
+terminationGracePeriodSeconds: 180
+
+zookeeper:
+  replicaCount: "3"
+
+image:
+  repository: solr
+  tag: 7.6.0
+  pullPolicy: Always
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+javaMem: "-Xms2g -Xmx3g"
+
+zookeeperHost:
+  port: 2181
+  serviceName: "zookeeper-service"
+  chroot: "my_solr_conf"
+
+logLevel: "INFO"
+
+livenessProbe:
+  initialDelaySeconds: 20
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 5
+
+volumeStorage: 20Gi  
+
+

@@ -1,0 +1,135 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: solr
+  labels:
+{{ include "solr.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{ toYaml .Values.selector | indent 6}}
+  serviceName: {{ include "solr.headless.service.name" .}}
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+        type: {{ .Values.updateStrategyType }}
+    
+  template:
+    metadata:
+      labels:
+{{ include "solr.pod.labels" . | indent 8 }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+        
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.servicePort }}
+      affinity:
+{{ tpl (toYaml .Values.affinity) .  | indent 8 }}
+        
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      volumes:
+        - name: solr-xml
+          configMap:
+            name: {{ include "solr.config.map.name" . }}
+            items:
+            - key: solr.xml
+              path: solr.xml
+      initContainers:
+        - name: check-zk
+          image: busybox:latest
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              COUNTER=0;
+              while [  $COUNTER -lt 120 ]; do
+                for i in {{ $vals := . -}}{{ range $i, $e := until ( int .Values.zookeeper.replicaCount ) -}}
+                  "{{ include "solr.zookeeper.name" $vals }}-{{ $i }}.{{ include "solr.zookeeper.service.name" $vals }}" {{ end -}};
+                  do mode=$(echo srvr | nc $i 2181 | grep "Mode");
+                    if [ "$mode" == "Mode: leader" ] || [ "$mode" == "Mode: standalone" ]; then
+                      echo "Found a ZK leader after $COUNTER attempts"
+                      exit 0;
+                    fi;
+                  done;
+                COUNTER=$(expr $COUNTER + 1);
+                sleep 2;
+              done;
+              echo "Did NOT see a ZK leader after 240 secs!";
+              exit 1;
+        - name: solr-nhs-schema
+          # This init container should move to nhscreatecollection chart
+          image: pjmd-ubuntu.com/solr_data_olnly:v0.0.3
+          command:
+            - 'sh'
+            - '-cxv'
+            - |
+              ls -al /nhs_solr_schema;
+              /opt/solr/bin/solr zk mkroot /my_solr_conf -z solr-zookeeper:2181 ;
+              /opt/solr/server/scripts/cloud-scripts/zkcli.sh -z solr-zookeeper:2181/my_solr_conf -cmd upconfig -confname mongoConnectorBaseConfig -confdir /nhs_solr_schema;
+        - name: "cp-solr-xml"
+          image: busybox:latest
+          command: ['sh', '-c', 'cp /tmp/solr.xml /tmp-config/solr.xml']
+          volumeMounts:
+          - name: "solr-xml"
+            mountPath: "/tmp"
+          - name: "solr-pvc"
+            mountPath: "/tmp-config"
+      containers:
+        - name: solr
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+            
+          ports:
+          - containerPort: {{ .Values.servicePort }}
+            name: solr-client
+          env:
+            - name: "SOLR_JAVA_MEM"
+              value: "{{ .Values.javaMem }}"
+            - name: "SOLR_HOME"
+              value: "/opt/solr/server/home"
+            - name: "SOLR_PORT"
+              value: "{{ .Values.servicePort }}"
+            - name: "POD_HOSTNAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: "SOLR_HOST"
+              value: "$(POD_HOSTNAME).{{ include  "solr.headless.service.name" .}}"
+            - name: "ZK_HOST"
+              value: "{{ .Values.zookeeperHost.serviceName }}:{{ .Values.zookeeperHost.port }}/{{ .Values.zookeeperHost.chroot }}"
+            - name: "SOLR_LOG_LEVEL"
+              value: "{{ .Values.logLevel }}"
+
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            httpGet:
+              scheme: "HTTP"
+              path: /solr/admin/info/system
+              port: {{ .Values.servicePort }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            httpGet:
+              scheme: "HTTP"
+              path: /solr/admin/info/system
+              port: {{ .Values.servicePort }}
+          volumeMounts:
+            - name: solr-pvc
+              mountPath: /opt/solr/server/home
+
+  volumeClaimTemplates:
+    - metadata:
+        name: solr-pvc
+        annotations:
+          pv.beta.kubernetes.io/gid: "{{ .Values.servicePort }}"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+          
+        resources:
+          requests:
+            storage: {{ .Values.volumeStorage }}

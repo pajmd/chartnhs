@@ -1,0 +1,20 @@
+---
+# service access for outsider
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "solr-svc-ext"
+  labels:
+{{ include "solr.labels" . | indent 4 }}
+  annotations:
+    {}
+    
+spec:
+  type: "NodePort"
+  ports:
+  - port: {{ .Values.servicePort}}
+    targetPort: {{ .Values.servicePort}}
+    name: "solr-public"
+  selector:
+{{ toYaml .Values.selector | indent 4}}
