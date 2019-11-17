@@ -4,28 +4,28 @@
 
 # globals for all templates
 global:
-  repo: pjm-ubuntu.com
+  repo: pjmd-ubuntu.com
   parent_app: "nhs-app"
 
 
 # scrapy template override for environment variables
-scrapy:
-  env:
-    kafka_host: 'kafka-svc'
-    bulk_enable: 'yes'
-    files_store: "/app/nhs_test_files"
-  image_tag: "v0.0.6"
+# scrapy:
+#   env:
+#     kafka_host: 'kafka-svc'
+#     bulk_enable: 'yes'
+#     files_store: "/app/nhs_test_files"
+#   image_tag: "v0.0.6"
 
 # piper template overrrides
-piper:
-  image_tag: "v0.0.4"
-  env:
-    mongo_host: mongo-0.mongo.default.svc.cluster.local:27017,mongo-1.mongo.default.svc.cluster.local:27017,mongo-2.mongo.default.svc.cluster.local:27017
-    mongo_replicaset: rs0
-    solr_host: solr-svc
-    kafka_host: kafka-svc
-    attempt_num: "12"
-    delay: "5"
+# piper:
+#   image_tag: "v0.0.4"
+#   env:
+#     mongo_host: mongo-0.mongo.default.svc.cluster.local:27017,mongo-1.mongo.default.svc.cluster.local:27017,mongo-2.mongo.default.svc.cluster.local:27017
+#     mongo_replicaset: rs0
+#     solr_host: solr-svc
+#     kafka_host: kafka-svc
+#     attempt_num: "12"
+#     delay: "5"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
