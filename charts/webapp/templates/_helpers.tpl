@@ -87,15 +87,33 @@ web app image repo
 {{- end -}}
 
 {{/*
-Web app mongo host
+webapp mongo name
+*/}}
+{{- define "webapp.mongo.pod.name" }}
+{{- printf "%s" "mongo" }}
+{{- end -}}
+
+{{/*
+webapp mongo service name
+*/}}
+{{- define "webapp.mongo.service.name" }}
+{{- printf "%s" "mongo" }}
+{{- end -}}
+
+{{- define "webapp.build.mongo_host" -}}
+{{ $val := .Values }}
+{{- range $i, $e := until ( int .Values.mongo.replicaCount ) -}}
+{{- printf "%s-%d.%s.%s," $val.mongo.podName $i $val.mongo.serviceName $val.mongo.domain -}} 
+{{ end -}}
+{{- end -}}
+
+{{/*
+Webapp mongo host
 */}}
 {{- define "webapp.mongo_host" -}}
-{{ if .Values.global }}
-{{- .Values.global.mongo_host | default .Values.mongo_host -}}
-{{ else }}
-{{- .Values.mongo_host -}}
-{{ end }}
+{{ include "webapp.build.mongo_host" . | trimSuffix "," }}
 {{- end -}}
+
 
 {{/*
 Web app mongo replicaset 

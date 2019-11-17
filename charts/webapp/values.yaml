@@ -15,3 +15,9 @@ image_tag: v0.0.6
 mongo_host: mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local
 mongo_replicaset: rs0
 solr_host: solr-svc
+mongo:
+  replicaCount: "3"
+  replicaset: rs0
+  podName: "mongo"
+  serviceName: "mongo"
+  domain: "default.svc.cluster.local"
