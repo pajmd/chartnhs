@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "solr.pod.labels" . | indent 8 }}
+{{ toYaml .Values.selector | indent 8}}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}
         

@@ -18,7 +18,7 @@ spec:
   selector:
     matchLabels:
 {{ include "mongo.selector" . | indent 6 }}
-  replicas: { .Values.replicaCount}
+  replicas: {{ .Values.replicaCount}}
   template:
     metadata:
       labels:

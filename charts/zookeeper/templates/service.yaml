@@ -8,7 +8,7 @@ metadata:
   labels:
 {{ include "zookeeper.labels" . | indent 4 }}
 spec:
-  type: clusterIP
+  type: ClusterIP
   ports:
     - name: client
       port: {{ .Values.env.ZK_CLIENT_PORT }}

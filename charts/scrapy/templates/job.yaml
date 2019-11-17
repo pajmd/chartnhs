@@ -43,9 +43,9 @@ spec:
         image: {{ include "scrapy.image.repo" . }}/{{.Values.image.name}}:{{.Values.image.tag}}
         env:
           - name: KAFKA_HOST
-            value: {{ .Values.env.kafka_host }}
+            value: {{ .Values.env.kafka_host | quote }}
           - name: BULK_SEND
-            value: {{ .Values.env.bulk_enable }}
+            value: {{ .Values.env.bulk_enable | quote }}
           - name: FILES_STORE
             value: {{ .Values.env.files_store | quote }}
         command: [{{ .Values.command | quote }}]
