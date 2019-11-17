@@ -87,7 +87,7 @@ scrapy image repo
 {{- end -}}
 
 {{/*
-scrapy zookeeper last instance
+scrapy zookeeper host:port
 */}}
 {{- define "scrapy.zookeper.hosts.and.ports" -}}
 {{- $val := .Values -}}
@@ -100,6 +100,9 @@ scrapy zookeeper last instance
 {{- end }}
 {{- end -}}
 
+{{/*
+scrapy zookeeper last instance
+*/}}
 {{- define "scrapy.last.zookeper.instance" }}
 {{- $last := sub .Values.zookeeper.replicaCount 1 }}
 {{- printf "%s-%d.%s" .Values.zookeeper.podName $last $.Values.zookeeper.service }}
