@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "nhscollection.job.name" .}}
+  labels:
+{{ include "nhscollection.labels" . | indent 4}}
+spec:
+  template:
+    spec:
+      containers:
+      - name: createcollection
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+          - 'sh'
+          - '-cxve'
+          - |
+            exec 2>&1
+            wait-for-solr.sh --solr-url http://{{ .Values.solr.host }}:{{ .Values.solr.port }};
+            echo "sleeping 1 sec before cerating collection";
+            sleep 1;
+            echo "Create collecion"
+            COUNTER=0;
+            while [  $COUNTER -lt 20 ]; do
+              if [ $(curl http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/collections?action=clusterstatus | jq '.cluster.live_nodes[]' | wc -l) -gt 2 ]; then
+                echo "Enough active solr nodes, creating NHS collection"
+                break;
+              else
+                echo "Not enough active solr nodes, waiting. $COUNTER attempts...";
+                COUNTER=`expr $COUNTER + 1`;
+                sleep 6;
+              fi
+            done;
+            if [ $COUNTER -eq 20 ]; then
+              echo "Not enough active solr nodes, giving up";
+              exit 1
+            else
+              echo "Sleeping 3 minutes waiting for things to settle!?";
+              sleep 1;
+              date -u;
+              echo "Trying to create this god d. collection";
+              echo "CREATE config";
+              date -u;
+              curl "http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true";
+              echo "CREATE collection";
+              date -u;
+              COUNTER=0;
+              curl "http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/collections?action=CREATE&name=nhsCollection&async=5555&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json";
+              while [  $COUNTER -lt 20 ]; do
+                date -u;
+                res=$(curl "http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/collections?action=REQUESTSTATUS&requestid=5555&wt=json" | jq '.status.state');
+                echo "REQUESTSTATUS: $res";
+                res="${res%\"}";
+                res="${res#\"}";
+                echo "REQUESTSTATUS stripped: $res";
+                if [ $res = "completed" ]; then
+                  echo "collection created";
+                  break;
+                elif [ $res = "failed" ]; then
+                  curl "http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/collections?action=DELETESTATUS&requestid=5555";
+                  echo "Failed creating collection, will try again in next job"
+                  COUNTER=0;
+                  exit 1;
+                else
+                  echo "Waiting for collection to complete - $COUNTER";
+                  COUNTER=`expr $COUNTER + 1`;
+                  sleep 10
+                fi
+              done;
+              curl "http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/admin/collections?action=DELETESTATUS&requestid=5555";
+              if [ $COUNTER -eq 20 ]; then
+                echo "Failed to create collection, giving up";
+                exit 1;
+              fi
+              echo "UPLOAD mongo fileds";
+              date -u;
+              curl -X POST -H "Content-type:application/json" --data-binary @/solr_mongo_fields/fields.json  http://{{ .Values.solr.host }}:{{ .Values.solr.port }}/solr/nhsCollection/schema;
+            fi
+
+      restartPolicy: Never
+  backoffLimit: 4
+
