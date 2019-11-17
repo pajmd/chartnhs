@@ -84,3 +84,14 @@ nhscollection labels
 {{ include "nhscollection.hosting.app" . }}
 tier: "nhscollection"
 {{- end -}}
+
+{{/*
+nhscollection image repo
+*/}}
+{{- define "nhscollection.image.repo" -}}
+{{ if .Values.global }}
+{{- .Values.global.repo | default .Values.image.repo -}}
+{{ else }}
+{{- .Values.image.repo -}}
+{{ end }}
+{{- end -}}

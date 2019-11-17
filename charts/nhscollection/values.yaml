@@ -5,9 +5,11 @@
 replicaCount: 1
 
 image:
-  repository: pjmd-ubuntu.com/solr_data_olnly
-  tag: v0.0.3
+  repo: "somerepo"
+  tag: "v0.0.3"
+  name: "solr_data_olnly"
   pullPolicy: IfNotPresent
+
 
 solr:
   host: "solr-svc"
