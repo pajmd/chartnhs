@@ -87,7 +87,7 @@ solr config map name
 solr service name
 */}}
 {{- define "solr.service.name" -}}
-{{- printf "%s-service" .Chart.Name }}
+{{- printf "%s-svc" .Chart.Name }}
 {{- end -}}
 
 
