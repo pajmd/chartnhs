@@ -7,8 +7,10 @@ appPort: 8000
 
 replicasNum: 2
 
-repo: "somerepo"
-image_tag: v0.0.6
+image:
+  repo: "somerepo"
+  tag: v0.0.6
+  name: "nhs-server-app"
 
 # mongo hosts need to be normalized with pipers and so they can be define in the top chart values.yaml
 # as globals i.e. either host:port or just host. See webapp _helpers.tpl

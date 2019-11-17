@@ -80,9 +80,9 @@ web app image repo
 */}}
 {{- define "webapp.image.repo" -}}
 {{ if .Values.global }}
-{{- .Values.global.repo | default .Values.repo -}}
+{{- .Values.global.repo | default .Values.image.repo -}}
 {{ else }}
-{{- .Values.repo -}}
+{{- .Values.image.repo -}}
 {{ end }}
 {{- end -}}
 
