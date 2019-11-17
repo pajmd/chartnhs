@@ -20,7 +20,7 @@ spec:
               exec 2>&1
               COUNTER=0
               while [  $COUNTER -lt 20 ]; do
-                brokers=$(echo dump | nc solr-zookeeper-2.solr-zookeeper-headless 2181 | grep brokers)
+                brokers=$(echo dump | nc {{ include "scrapy.last.zookeper.instance" .}} {{ .Values.zookeeper.port }} | grep brokers)
                 if [ $? -eq 1 ] || [ -z $brokers ]; then
                   echo "Kafka is NOT running , waiting. $COUNTER attempts...";
                   COUNTER=`expr $COUNTER + 1`;
@@ -35,7 +35,7 @@ spec:
                 exit 1;
               else
                 echo "Creating THE topic!!!!"
-                bin/kafka-topics.sh --create --if-not-exists --zookeeper solr-zookeeper-0.solr-zookeeper-headless:2181,solr-zookeeper-1.solr-zookeeper-headless:2181,solr-zookeeper-2.solr-zookeeper-headless:2181  --replication-factor 1 --partitions 1 --topic scrapypipe;
+                bin/kafka-topics.sh --create --if-not-exists --zookeeper {{ include "scrapy.zookeper.hosts.and.ports" . }}  --replication-factor 1 --partitions 1 --topic scrapypipe;
               fi
 
       containers:

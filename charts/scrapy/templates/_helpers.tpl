@@ -85,3 +85,22 @@ scrapy image repo
 {{- .Values.image.repo -}}
 {{ end }}
 {{- end -}}
+
+{{/*
+scrapy zookeeper last instance
+*/}}
+{{- define "scrapy.zookeper.hosts.and.ports" -}}
+{{- $val := .Values -}}
+{{ range $i, $num := until ( int .Values.zookeeper.replicaCount ) }}
+{{- if eq $i (sub $val.zookeeper.replicaCount 1) }}
+{{- printf "%s-%d.%s:%s" $val.zookeeper.podName $i $val.zookeeper.service $val.zookeeper.port -}}
+{{ else }}
+{{- printf "%s-%d.%s:%s," $val.zookeeper.podName $i $val.zookeeper.service $val.zookeeper.port -}}
+{{ end }}
+{{- end }}
+{{- end -}}
+
+{{- define "scrapy.last.zookeper.instance" }}
+{{- $last := sub .Values.zookeeper.replicaCount 1 }}
+{{- printf "%s-%d.%s" .Values.zookeeper.podName $last $.Values.zookeeper.service }}
+{{- end -}}

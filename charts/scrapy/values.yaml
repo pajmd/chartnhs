@@ -11,3 +11,9 @@ image:
   name: "scrapy-nhs"
 
 command: "/app/docker_send_test_files.sh"
+
+zookeeper:
+  podName: zookeeper
+  service: zookeeper-headless-service
+  port: 2181
+  replicaCount: "3"
