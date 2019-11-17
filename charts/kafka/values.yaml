@@ -20,7 +20,7 @@ image:
   pullPolicy: IfNotPresent
 
 zookeeper:
-  service: zookeeper
+  service: zookeeper-service
   port: 2181
 
 logRetention: -1
