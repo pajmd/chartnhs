@@ -4,7 +4,11 @@
 # piper image repo public pajmd or private pjmd-ubuntu.cm
 repo: pajmd
 
-image_tag: "v0.0.4"
+image:
+  repo: "somerepo"
+  tag: "v0.0.4"
+  name: "nhs_piper"
+
 pipers_replicas: 1
 
 # mongo hosts need to be normalized with pipers and so they can be define in the top chart values.yaml
@@ -17,3 +21,10 @@ env:
   mongo_attempt_num: "12"
   solr_attempt_num: "36"
   delay: "5"
+
+mongo:
+  replicaCount: "3"
+  podName: mongo
+  service: mongo
+  domain: "default.svc.cluster.local"
+  port: 27017

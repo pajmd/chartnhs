@@ -75,7 +75,11 @@ mongo & solr main app
 */}}
 {{- define "piper.main.app.labels" -}}
 {{- $app := printf "%s-%s" .Chart.Name "nhs" -}}
-app: {{ .Values.global.parent_app | default $app }}
+{{ if .Values.global }}
+{{- printf "app: %s" .Values.global.parent_app | default $app -}}
+{{ else }}
+{{- printf "app: %s" $app -}} 
+{{ end }}
 {{- end -}}
 
 {{/*
@@ -110,3 +114,27 @@ main app & solr piper labels
 {{ include "piper.solr.labels" . }}
 {{- end -}}
 
+{{/*
+piper image repo
+*/}}
+{{- define "piper.image.repo" -}}
+{{ if .Values.global }}
+{{- .Values.global.repo | default .Values.image.repo -}}
+{{ else }}
+{{- .Values.image.repo -}}
+{{ end }}
+{{- end -}}
+
+{{/*
+piper mongo host:port
+*/}}
+{{- define "piper.mongo.hosts.and.ports" -}}
+{{- $val := .Values -}}
+{{ range $i, $num := until ( int .Values.mongo.replicaCount ) }}
+{{- if eq $i (sub $val.mongo.replicaCount 1) }}
+{{- printf "%s-%d.%s.%s:%s" $val.mongo.podName $i $val.mongo.service $val.mongo.domain $val.mongo.port -}}
+{{ else }}
+{{- printf "%s-%d.%s.%s:%s," $val.mongo.podName $i $val.mongo.service $val.mongo.domain $val.mongo.port -}}
+{{ end }}
+{{- end }}
+{{- end -}}
