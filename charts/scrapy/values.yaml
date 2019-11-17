@@ -5,6 +5,9 @@ env:
   files_store: "/app/nhs_test_files"
 
 # scrapy image repo public pajmd or private pjmd-ubuntu.cm
-repo: pajmd
-image_tag: "v0.0.6"
+image:
+  repo: "somerepo"
+  tag: v0.0.6
+  name: "scrapy-nhs"
+
 command: "/app/docker_send_test_files.sh"

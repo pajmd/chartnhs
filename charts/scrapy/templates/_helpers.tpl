@@ -66,9 +66,22 @@ Create the job name
 scrapy labels
 */}}
 {{- define "scrapy.labels" -}}
-{{- $app := printf "%s-%s" .Chart.Name "nhs" }}
-app: {{ .Values.global.parent_app | default $app }}
+{{- $app := printf "%s-%s" .Chart.Name "nhs" -}}
+{{ if .Values.global }}
+{{- printf "app: %s" .Values.global.parent_app | default $app -}}
+{{ else }}
+{{- printf "app: %s" $app -}}
+{{ end }}
 tier: "scrapy"
 {{- end -}}
 
-
+{{/*
+scrapy image repo
+*/}}
+{{- define "scrapy.image.repo" -}}
+{{ if .Values.global }}
+{{- .Values.global.repo | default .Values.image.repo -}}
+{{ else }}
+{{- .Values.image.repo -}}
+{{ end }}
+{{- end -}}
