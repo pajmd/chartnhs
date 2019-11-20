@@ -66,7 +66,7 @@ Create the kafka statefulset name
 kafka pod labels
 */}}
 {{- define "kafka.pod.labels" -}}
-{{ include "kafka.labels" .}}
+{{ include "kafka.selector" .}}
 type: pod
 {{- end -}}
 

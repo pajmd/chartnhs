@@ -100,9 +100,10 @@ zookeeper headless service name
 {{- end -}}
 
 {{/*
-zookeeper pod labels
+zookeeper pod labels: service selector must select pod labels
 */}}
 {{- define "zookeeper.pod.labels" -}}
 {{ include "zookeeper.labels" .}}
-tpye: pod
+type: pod
+synchronizer: "zookeeper"
 {{- end -}}

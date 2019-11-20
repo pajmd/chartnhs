@@ -27,14 +27,16 @@ spec:
             value: {{ include "piper.mongo.hosts.and.ports" . }}
           - name: MONGO_REPLICASET
             value: {{ .Values.env.mongo_replicaset | quote }}
-          - name: SOLR_HOST
-            value: {{ .Values.env.solr_host | quote }}
           - name: KAFKA_HOST
             value: {{ .Values.env.kafka_host | quote }}
           - name: ATTEMPT_NUM
             value: {{ .Values.env.mongo_attempt_num | quote }}
           - name: DELAY
             value: {{ .Values.env.delay | quote }}
+          - name: ZOOKEEPER_HOST
+            value: {{ .Values.env.zookeeper_host | quote }}
+          - name: ZOOKEEPER_PORT
+            value: {{ .Values.env.zookeeper_port | quote }}
         # Thes args are crazyness, start_piper.sh should get its args from env variables since
         # the python piper read their are from env variables.
         command: ["/app/start_piper.sh"]
@@ -65,6 +67,8 @@ spec:
         env:
           - name: SOLR_HOST
             value: {{ .Values.env.solr_host | quote }}
+          - name: SOLR_PORT
+            value: {{ .Values.env.solr_port | quote }}
 #          - name: SOLR_PORT
 #            value: 8993
           - name: KAFKA_HOST
@@ -73,5 +77,9 @@ spec:
             value: {{ .Values.env.solr_attempt_num | quote }}
           - name: DELAY
             value: {{ .Values.env.delay | quote }}
+          - name: ZOOKEEPER_HOST
+            value: {{ .Values.env.zookeeper_host | quote }}
+          - name: ZOOKEEPER_PORT
+            value: {{ .Values.env.zookeeper_port | quote }}
         command: ["/app/start_piper.sh"]
         args: ["solr", {{ .Values.env.solr_host | quote }}]

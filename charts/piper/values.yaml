@@ -5,8 +5,8 @@
 repo: pajmd
 
 image:
-  repo: "somerepo"
-  tag: "v0.0.4"
+  repo: "pjmd-ubuntu.com"
+  tag: "v0.0.8"
   name: "nhs_piper"
 
 pipers_replicas: 1
@@ -17,10 +17,13 @@ env:
   mongo_host: mongo-0.mongo.default.svc.cluster.local:27017,mongo-1.mongo.default.svc.cluster.local:27017,mongo-2.mongo.default.svc.cluster.local:27017
   mongo_replicaset: rs0
   solr_host: solr-svc
+  solr_port: "8983"
   kafka_host: kafka-svc
   mongo_attempt_num: "12"
   solr_attempt_num: "36"
   delay: "5"
+  zookeeper_host: "zookeeper-2.zookeeper-headless-service"
+  zookeeper_port: "2181"
 
 mongo:
   replicaCount: "3"
