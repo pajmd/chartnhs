@@ -4,11 +4,6 @@
 
 replicaCount: 3
 
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -57,9 +52,14 @@ zookeeper:
   replicaCount: "3"
 
 image:
-  repository: solr
-  tag: 7.6.0
-  pullPolicy: Always
+  container:
+    repository: solr
+    tag: 7.6.0
+    pullPolicy: Always
+  initContainer:
+    repository: solr_data_olnly
+    tag: v0.0.3
+    pullPolicy: Always
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

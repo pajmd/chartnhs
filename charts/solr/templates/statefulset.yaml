@@ -59,7 +59,7 @@ spec:
               exit 1;
         - name: solr-nhs-schema
           # This init container should move to nhscreatecollection chart
-          image: pjmd-ubuntu.com/solr_data_olnly:v0.0.3
+          image: {{ include "solr.image.repo" . }}/{{.Values.image.initContainer.repository}}:{{.Values.image.initContainer.tag}}
           command:
             - 'sh'
             - '-cxv'
@@ -77,7 +77,7 @@ spec:
             mountPath: "/tmp-config"
       containers:
         - name: solr
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.container.repository }}:{{ .Values.image.container.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}

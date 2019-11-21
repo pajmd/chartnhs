@@ -120,3 +120,14 @@ Solr zookeeper service name
 {{- printf "%s-headless-service" (include "solr.zookeeper.name" .) }}
 {{- end -}}
 
+
+{{/*
+solr image repo
+*/}}
+{{- define "solr.image.repo" -}}
+{{ if .Values.global }}
+{{- .Values.global.repo | default .Values.image.repo -}}
+{{ else }}
+{{- .Values.image.repo -}}
+{{ end }}
+{{- end -}}
