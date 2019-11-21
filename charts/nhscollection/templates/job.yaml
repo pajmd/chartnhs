@@ -15,7 +15,21 @@ spec:
           - '-cxve'
           - |
             exec 2>&1
-            wait-for-solr.sh --wait-seconds 10 --max-attempts 24 --solr-url http://{{ .Values.solr.host }}:{{ .Values.solr.port }};
+            COUNTER=0;
+            while [  $COUNTER -lt 20 ]; do
+              if wget -q -O - http://{{ .Values.solr.host }}:{{ .Values.solr.port }} | grep -q -i solr; then
+                echo "Solr is running"
+                break;
+              else
+                echo "Solr is not running, waiting. $COUNTER attempts...";
+                COUNTER=`expr $COUNTER + 1`;
+                sleep 10;
+              fi
+            done;
+            if [ $COUNTER -eq 20 ]; then
+              echo "Solr not running, giving up";
+              exit 1
+            fi
             echo "sleeping 1 sec before cerating collection";
             sleep 1;
             echo "Create collecion"
