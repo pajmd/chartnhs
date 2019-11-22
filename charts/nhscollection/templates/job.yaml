@@ -104,6 +104,9 @@ spec:
                 if wait-for is-solr-collection-creation-status-completed "$event" ; then
                   echo "UPLOAD mongo fileds";
                   upload-mongo-fields "$COLLECTION_NAME"
+                else
+                  clear-async-create-collection-request-id
+                  exit 1
                fi
                clear-async-create-collection-request-id
               fi  
