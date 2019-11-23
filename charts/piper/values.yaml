@@ -6,7 +6,7 @@ repo: pajmd
 
 image:
   repo: "pjmd-ubuntu.com"
-  tag: "v0.0.9"
+  tag: "v0.0.10"
   name: "nhs_piper"
 
 pipers_replicas: 1
