@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repo: "pjmd-ubuntu.com"
-  tag: "v0.0.4"
+  tag: "v0.0.5"
   name: "solr_data_olnly"
   pullPolicy: IfNotPresent
 

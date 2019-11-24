@@ -6,7 +6,7 @@ env:
 
 # scrapy image repo public pajmd or private pjmd-ubuntu.cm
 image:
-  repo: "somerepo"
+  repo: "pjmd-ubuntu.com"
   tag: v0.0.6
   name: "scrapy-nhs"
 
