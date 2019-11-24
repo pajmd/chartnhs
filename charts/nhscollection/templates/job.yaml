@@ -107,9 +107,13 @@ spec:
                 else
                   clear-async-create-collection-request-id
                   exit 1
-               fi
-               clear-async-create-collection-request-id
-              fi  
+                fi
+                clear-async-create-collection-request-id
+              else
+                exit 1
+              fi
+            else
+              exit 1  
             fi            
 
       restartPolicy: Never
